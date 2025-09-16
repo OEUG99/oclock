@@ -1,42 +1,46 @@
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-int get_term_length(void);
+void update_time(int *hour, int *min, int *sec) {
+    time_t now;
+    time(&now);
+    struct tm *timeinfo = localtime(&now);
+    *min = timeinfo->tm_min;
+    *hour = timeinfo->tm_hour;
+    *sec = timeinfo->tm_sec;
+}
 
 int main(void) {
     time_t now;
     int min, hour, second;
-    int term_length;
-    struct tm *timeinfo;
-    time(&now);
     printf("Current Time:\n %s", ctime(&now));
     printf("testing:\n");
+
+    // get current time
+    struct tm *timeinfo;
+    time(&now);
     timeinfo = localtime(&now);
     min = timeinfo->tm_min;
     hour = timeinfo->tm_hour;
     second = timeinfo->tm_sec;
-    printf("%d:%d:%d\n", hour, min, second);
-    
-    term_length = get_term_length();
 
-    // starting ncursers test
+
+    // starting ncursers drawing
     initscr();
-    printw("ncurses works!\n");
-    refresh();
+    // main loop
+    while(1) {
+        update_time(&hour, &min, &second); // update time
+        clear();
+        mvprintw(0, 0, "%02d:%02d:%02d\n", hour, min, second);
+        refresh();
+        sleep(1);
+    }
+    // ... existing code ...
     getch();
     endwin();
 
     return 0;
 }
-
-int get_term_length(void){
-    struct winsize w;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) {
-        return -1; // fallback in case of error
-    }
-    return w.ws_col; // number of columns
-}
-
