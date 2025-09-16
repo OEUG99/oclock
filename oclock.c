@@ -38,7 +38,6 @@ int main(void) {
         refresh();
         sleep(1);
     }
-    // ... existing code ...
     getch();
     endwin();
 
